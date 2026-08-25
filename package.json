@@ -1,0 +1,29 @@
+{
+  "name": "packageguard",
+  "version": "1.0.0",
+  "description": "Detecting AI Hallucinated Packages",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ishika-thakur7802/packageguard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ishika-thakur7802/packageguard/issues"
+  },
+  "homepage": "https://github.com/ishika-thakur7802/packageguard#readme",
+  "dependencies": {
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}
