@@ -1,65 +1,118 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import type { RegistryResult } from "../src/registry/types";
 import { analyzeRisk } from "../src/risk/riskAnalyzer";
 
-const existingPackage = {
-  name: "react",
-  exists: true,
-};
+function makePackage(
+  overrides: Partial<RegistryResult>
+): RegistryResult {
+  return {
+    name: "test-package",
+    exists: true,
+    latestVersion: "1.0.0",
+    createdAt: new Date(
+      Date.now() - 30 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    modifiedAt: new Date().toISOString(),
+    downloads: 1000,
+    repository: "https://github.com/example/test-package",
+    maintainers: ["test-user"],
+    scripts: {},
+    ...overrides,
+  };
+}
 
-const newPackage = {
-  name: "some-new-package",
-  exists: true,
-  createdAt: new Date(
-    Date.now() - 2 * 24 * 60 * 60 * 1000
-  ).toISOString(),
-};
+test("existing package has low risk", () => {
+  const result = analyzeRisk(
+    makePackage({
+      name: "react",
+    })
+  );
 
-const lowDownloadPackage = {
-  name: "low-download-package",
-  exists: true,
-  createdAt: new Date(
-    Date.now() - 2 * 24 * 60 * 60 * 1000
-  ).toISOString(),
-  downloads: 12,
-};
+  assert.equal(result.score, 0);
+  assert.equal(result.level, "LOW");
+  assert.deepEqual(result.reasons, []);
+});
 
-const missingPackage = {
-  name: "fake-ai-package",
-  exists: false,
-};
+test("new package receives age risk", () => {
+  const result = analyzeRisk(
+    makePackage({
+      name: "some-new-package",
+      createdAt: new Date(
+        Date.now() - 2 * 24 * 60 * 60 * 1000
+      ).toISOString(),
+    })
+  );
 
-const noRepositoryPackage = {
-  name: "no-repository-package",
-  exists: true,
-  createdAt: new Date(
-    Date.now() - 2 * 24 * 60 * 60 * 1000
-  ).toISOString(),
-  downloads: 12,
-};
+  assert.equal(result.score, 30);
+  assert.equal(result.level, "MEDIUM");
+  assert.ok(
+    result.reasons.includes("Package is less than 7 days old")
+  );
+});
 
-const installScriptPackage = {
-  name: "install-script-package",
-  exists: true,
-  createdAt: new Date(
-    Date.now() - 2 * 24 * 60 * 60 * 1000
-  ).toISOString(),
-  downloads: 12,
-  installScripts: ["postinstall"],
-};
+test("low download activity increases risk", () => {
+  const result = analyzeRisk(
+    makePackage({
+      name: "low-download-package",
+      downloads: 12,
+    })
+  );
 
-console.log("Existing package:");
-console.log(analyzeRisk(existingPackage));
+  assert.equal(result.score, 20);
+  assert.equal(result.level, "LOW");
+  assert.ok(
+    result.reasons.includes(
+      "Package has a very low download activity"
+    )
+  );
+});
 
-console.log("\nNew package:");
-console.log(analyzeRisk(newPackage));
+test("missing package is critical", () => {
+  const result = analyzeRisk(
+    makePackage({
+      name: "fake-ai-package",
+      exists: false,
+    })
+  );
 
-console.log("\nMissing package:");
-console.log(analyzeRisk(missingPackage));
+  assert.equal(result.score, 100);
+  assert.equal(result.level, "CRITICAL");
+  assert.deepEqual(result.reasons, [
+    "Package does not exist on npm",
+  ]);
+});
 
-console.log("\nLowDownloads package:");
-console.log(analyzeRisk(lowDownloadPackage));
+test("missing repository increases risk", () => {
+  const result = analyzeRisk(
+    makePackage({
+      name: "no-repository-package",
+      repository: null,
+    })
+  );
 
-console.log("\nNo Repository Package:");
-console.log(analyzeRisk(noRepositoryPackage));
+  assert.equal(result.score, 15);
+  assert.equal(result.level, "LOW");
+  assert.ok(
+    result.reasons.includes("No repository found")
+  );
+});
 
-console.log("\nInstall Script Package:");
-console.log(analyzeRisk(installScriptPackage));
+test("install-time scripts increase risk", () => {
+  const result = analyzeRisk(
+    makePackage({
+      name: "install-script-package",
+      scripts: {
+        postinstall: "node install.js",
+      },
+    })
+  );
+
+  assert.equal(result.score, 20);
+  assert.equal(result.level, "LOW");
+  assert.ok(
+    result.reasons.includes(
+      "Package contains install-time scripts"
+    )
+  );
+});

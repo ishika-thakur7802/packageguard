@@ -1,20 +1,31 @@
 {
   "name": "packageguard",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "An npm dependency risk scanner using package metadata and transparent heuristic scoring.",
   "main": "index.js",
   "bin": {
     "packageguard": "dist/index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "test": "tsx --test tests/*.test.ts tests/*-test.ts"
   },
-  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "npm",
+    "security",
+    "dependencies",
+    "supply-chain-security",
+    "cli"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   },
   "dependencies": {

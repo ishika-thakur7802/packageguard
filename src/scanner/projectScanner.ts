@@ -1,12 +1,13 @@
 import fs from "fs";
 import path from "path";
 import { Dependency, PackageJson } from "../types/dependency";
+import { recurse } from "./recurse";
 
-export function findPackageJson(): string | null {
-  const currentDirectory = process.cwd();
-
+export function findPackageJson(
+  directory: string = process.cwd()
+): string | null {
   const packageJsonPath = path.join(
-    currentDirectory,
+    directory,
     "package.json"
   );
 
@@ -51,4 +52,28 @@ export function getDependencies(
   }
 
   return result;
+}
+export function getDependencyTree(
+  packageJsonPath: string,
+  maxDepth: number = 5
+): Dependency[] {
+  const dependencies = getDependencies(packageJsonPath);
+
+  const nodeModulesPath = path.join(
+    path.dirname(packageJsonPath),
+    "node_modules"
+  );
+
+  for (const dependency of dependencies) {
+    dependency.tree = recurse(
+      dependency.name,
+      dependency.version,
+      nodeModulesPath,
+      new Set<string>(),
+      0,
+      maxDepth
+    );
+  }
+
+  return dependencies;
 }

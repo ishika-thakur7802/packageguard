@@ -67,23 +67,19 @@ export function analyzeRisk(packageInfo: RegistryResult): RiskResult {
      }
    }
 
-   if(packageInfo.downloads!==undefined && packageInfo.downloads<100)
-   {
-       score+=20;
-       reasons.push(
-           "Package has a very low download activity"
-           )
-       }
+   if (packageInfo.downloads !== null && packageInfo.downloads < 100) {
+  score += 20;
+  reasons.push(
+    "Package has a very low download activity"
+  );
+}
    if(!packageInfo.repository)
    {
        score+=15;
        reasons.push(
            "No repository found");
        }
-if (
-  packageInfo.installScripts &&
-  packageInfo.installScripts.length > 0
-) {
+if (packageInfo.scripts && Object.keys(packageInfo.scripts).length > 0) {
   score += 20;
 
   reasons.push(
