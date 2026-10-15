@@ -165,3 +165,7 @@ npm test
 Feedback, bug reports, and contributions are welcome.
 
 PackageGuard is an evolving project exploring dependency discovery, npm registry integration, and explainable risk scoring.
+
+## Read more here: 
+[https://dev.to/ishikathakur7802/building-packageguard-dependency-traversal-external-apis-and-explainable-risk-scoring-in-2hmf
+](url)
