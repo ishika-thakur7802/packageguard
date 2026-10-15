@@ -8,6 +8,8 @@ It started from a practical question: *How can developers identify suspicious or
 
 PackageGuard's current implementation focuses on package existence and metadata-based risk signals. It is a first step toward that goal, not a complete malware detector.
 
+[![npm version](https://img.shields.io/npm/v/packageguard)](https://www.npmjs.com/package/packageguard)
+[![npm downloads](https://img.shields.io/npm/dm/packageguard)](https://www.npmjs.com/package/packageguard)
 ## Features
 
 - **Dependency scanning:** Reads `dependencies` and `devDependencies` from a project's `package.json`.
@@ -59,7 +61,7 @@ The current scoring rules are:
 | Package is less than 7 days old | +30 |
 | Fewer than 100 weekly downloads | +20 |
 | Repository metadata is missing | +15 |
-| Package contains scripts | +20 |
+| Install-time lifecycle script is present | +20 |
 
 Scores are capped at 100.
 

@@ -1,3 +1,4 @@
+
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { RegistryResult } from "../src/registry/types";
@@ -23,11 +24,7 @@ function makePackage(
 }
 
 test("existing package has low risk", () => {
-  const result = analyzeRisk(
-    makePackage({
-      name: "react",
-    })
-  );
+  const result = analyzeRisk(makePackage({ name: "react" }));
 
   assert.equal(result.score, 0);
   assert.equal(result.level, "LOW");
@@ -93,12 +90,10 @@ test("missing repository increases risk", () => {
 
   assert.equal(result.score, 15);
   assert.equal(result.level, "LOW");
-  assert.ok(
-    result.reasons.includes("No repository found")
-  );
+  assert.ok(result.reasons.includes("No repository found"));
 });
 
-test("install-time scripts increase risk", () => {
+test("install-time lifecycle scripts increase risk", () => {
   const result = analyzeRisk(
     makePackage({
       name: "install-script-package",
@@ -112,7 +107,40 @@ test("install-time scripts increase risk", () => {
   assert.equal(result.level, "LOW");
   assert.ok(
     result.reasons.includes(
-      "Package contains install-time scripts"
+      "Package contains install-time lifecycle scripts"
+    )
+  );
+});
+
+test("ordinary scripts do not increase risk", () => {
+  const result = analyzeRisk(
+    makePackage({
+      scripts: {
+        test: "node test.js",
+        build: "tsc",
+        lint: "eslint .",
+      },
+    })
+  );
+
+  assert.equal(result.score, 0);
+  assert.equal(result.level, "LOW");
+  assert.deepEqual(result.reasons, []);
+});
+
+test("prepare lifecycle script increases risk", () => {
+  const result = analyzeRisk(
+    makePackage({
+      scripts: {
+        prepare: "node prepare.js",
+      },
+    })
+  );
+
+  assert.equal(result.score, 20);
+  assert.ok(
+    result.reasons.includes(
+      "Package contains install-time lifecycle scripts"
     )
   );
 });
